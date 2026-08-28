@@ -2,6 +2,8 @@
 
 스크린샷의 Company OS 구조를 QA+ 운영에 맞게 재설계한 로컬 우선 MVP입니다.
 
+공개 MVP: <https://gohwansok-max.github.io/qa-plus-company-os/>
+
 ## 실행
 
 `run-company-os.bat`를 더블클릭하거나 PowerShell에서 다음을 실행합니다.
@@ -27,6 +29,8 @@ python server.py
 - 작업·승인·활동 이력을 `data/os_state.json`에 로컬 저장
 - OSMU 표준 파이프라인, AI 임원진, 자동화 모듈, 지식창고 화면
 - 외부 발행과 비밀정보 저장 차단
+
+GitHub Pages 공개 버전은 서버가 없으므로 업무 상태를 사용자 브라우저의 로컬 저장소에 보관합니다. 다른 기기나 브라우저와 자동 동기화되지는 않습니다.
 
 ## 다음 연결 단계
 

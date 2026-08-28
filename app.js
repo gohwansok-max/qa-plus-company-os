@@ -5,6 +5,20 @@ const dialog = document.querySelector('#taskDialog');
 const toast = document.querySelector('#toast');
 let snapshot = { metrics: {}, state: { tasks: [], approvals: [], activity: [] } };
 let currentView = 'dashboard';
+const STORAGE_KEY = 'qaplus-company-os-state-v1';
+const STATIC_SNAPSHOT = {
+  metrics: { topics: 95, blogs: 8, videos: 27, scripts: 18, agents: 13, harnesses: 1 },
+  state: {
+    tasks: [
+      { id: 'seed-1', title: '화요일 QA+ 정기 영상 준비', team: '콘텐츠팀', stage: '검수', owner: 'CCO', priority: '높음', updatedAt: '2026-08-28T08:00:00+09:00' },
+      { id: 'seed-2', title: '일일 인포그래픽 주제 선정', team: '콘텐츠팀', stage: '대기', owner: 'COO', priority: '보통', updatedAt: '2026-08-28T08:00:00+09:00' }
+    ],
+    approvals: [],
+    activity: [{ message: 'QA+ Company OS 공개 MVP가 준비되었습니다.', at: '2026-08-28T08:00:00+09:00' }]
+  },
+  safeMode: true,
+  mode: 'public-demo'
+};
 
 // 같은 localhost 포트를 사용했던 다른 앱의 오래된 서비스워커가 API를 가로채지 않게 한다.
 if ('serviceWorker' in navigator) {
@@ -35,12 +49,24 @@ function showToast(message){toast.textContent=message;toast.classList.add('show'
 function formatTime(value){try{return new Intl.DateTimeFormat('ko-KR',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'}).format(new Date(value));}catch{return value;}}
 
 async function load(){
-  const response=await fetch('/api/status',{cache:'no-store'}); if(!response.ok) throw new Error('상태를 불러오지 못했습니다.');
-  snapshot=await response.json(); document.querySelector('#approvalBadge').textContent=snapshot.state.approvals.length; render();
+  try {
+    const response=await fetch('/api/status',{cache:'no-store'}); if(!response.ok) throw new Error('local api unavailable');
+    snapshot=await response.json();
+  } catch {
+    const saved=localStorage.getItem(STORAGE_KEY);
+    snapshot=structuredClone(STATIC_SNAPSHOT);
+    if(saved) snapshot.state=JSON.parse(saved);
+  }
+  document.querySelector('#approvalBadge').textContent=snapshot.state.approvals.length; render();
 }
 async function save(){
-  const response=await fetch('/api/state',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(snapshot.state)});
-  if(!response.ok) throw new Error('저장에 실패했습니다.');
+  localStorage.setItem(STORAGE_KEY,JSON.stringify(snapshot.state));
+  try {
+    const response=await fetch('/api/state',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(snapshot.state)});
+    if(!response.ok) throw new Error('local api unavailable');
+  } catch {
+    // GitHub Pages에서는 상태를 현재 브라우저에만 저장한다.
+  }
 }
 
 function dashboard(){
@@ -56,7 +82,7 @@ function library(){const m=snapshot.metrics;return `<div class="hero"><div class
 function agentView(){return `<div class="agent-grid">${agents.map(a=>`<div class="agent"><div class="agent-top"><h3>${a[0]}</h3><span><i class="dot"></i> 준비됨</span></div><p>${a[1]}</p><button class="text-btn" onclick="showToast('${a[0]} 호출은 다음 연결 단계에서 활성화됩니다.')">역할 보기</button></div>`).join('')}</div>`;}
 function automation(){return `<div class="section"><div class="section-head"><div><h2>자동화 모듈</h2><p>현재 프로젝트에서 발견된 실행 자산</p></div><span class="safe">안전 모드</span></div><div class="module-grid">${[['일일 QA 콘텐츠','주제 큐 기반 쇼츠 제작'],['블로그 생성','조사와 원고 생성'],['영상 하네스','유튜브 자막→검증형 코드'],['한국어 음성','TTS 내레이션 자산'],['업로드 도구','YouTube·Meta 연결 준비'],['Telegram','원격 명령과 결과 알림']].map(x=>`<div class="module"><span class="module-icon">⌁</span><h3>${x[0]}</h3><p>${x[1]}</p><em>발행 차단</em></div>`).join('')}</div></div>`;}
 function approval(){return `<div class="section"><div class="section-head"><div><h2>대표 승인 대기</h2><p>외부 발행은 이 승인 이후에만 허용됩니다.</p></div></div>${snapshot.state.approvals.length?taskRows(snapshot.state.approvals):'<div class="empty-note">현재 승인 대기 항목이 없습니다.</div>'}</div>`;}
-function settings(){return `<div class="section"><h2>보안과 데이터 경계</h2><div class="activity">서버 접근 범위 <small>127.0.0.1 로컬 PC에서만 접속</small></div><div class="activity">외부 게시 <small>비활성 — 대표님의 명시적 요청 전까지 차단</small></div><div class="activity">업무 데이터 <small>company-os/data/os_state.json에 로컬 저장</small></div><div class="activity">비밀정보 <small>화면과 상태 파일에 저장하지 않음</small></div></div>`;}
+function settings(){const storage=snapshot.mode==='public-demo'?'현재 브라우저의 로컬 저장소에만 저장':'data/os_state.json에 로컬 저장';return `<div class="section"><h2>보안과 데이터 경계</h2><div class="activity">실행 모드 <small>${snapshot.mode==='public-demo'?'GitHub Pages 공개 MVP':'127.0.0.1 로컬 앱'}</small></div><div class="activity">외부 게시 <small>비활성 — 대표님의 별도 승인 전까지 차단</small></div><div class="activity">업무 데이터 <small>${storage}</small></div><div class="activity">비밀정보 <small>화면과 상태 파일에 저장하지 않음</small></div></div>`;}
 function modulesView(){return `<div class="module-grid">${modules.map(m=>`<div class="module" onclick="navigate('${m[2]}')"><span class="module-icon">□</span><h3>${m[0]}</h3><p>${m[1]}</p></div>`).join('')}</div>`;}
 function render(){title.textContent=views[currentView][0];breadcrumb.textContent=views[currentView][1];view.innerHTML=({dashboard:dashboard(),workroom:workroom(),pipeline:pipeline(),library:library(),agents:agentView(),automation:automation(),approval:approval(),settings:settings()}[currentView]||modulesView());}
 function navigate(name){currentView=name;document.querySelectorAll('.nav-item').forEach(b=>b.classList.toggle('active',b.dataset.view===name));render();}
@@ -66,5 +92,5 @@ window.advanceTask=async id=>{const stages=['대기','조사','작성','검수',
 document.querySelector('#nav').addEventListener('click',e=>{const b=e.target.closest('[data-view]');if(b)navigate(b.dataset.view);});
 document.querySelector('#newTaskBtn').addEventListener('click',openTask);document.querySelector('#closeDialog').addEventListener('click',()=>dialog.close());document.querySelector('#cancelDialog').addEventListener('click',()=>dialog.close());
 document.querySelector('#refreshBtn').addEventListener('click',()=>load().then(()=>showToast('프로젝트 현황을 새로 읽었습니다.')).catch(e=>showToast(e.message)));
-document.querySelector('#taskForm').addEventListener('submit',async e=>{e.preventDefault();const data=Object.fromEntries(new FormData(e.currentTarget));const task={id:crypto.randomUUID(),...data,updatedAt:new Date().toISOString()};snapshot.state.tasks.unshift(task);snapshot.state.activity.push({message:`새 업무 등록: ${task.title}`,at:task.updatedAt});await save();e.currentTarget.reset();dialog.close();render();showToast('업무를 저장했습니다.');});
+document.querySelector('#taskForm').addEventListener('submit',async e=>{e.preventDefault();const form=e.currentTarget;const data=Object.fromEntries(new FormData(form));const task={id:crypto.randomUUID(),...data,updatedAt:new Date().toISOString()};snapshot.state.tasks.unshift(task);snapshot.state.activity.push({message:`새 업무 등록: ${task.title}`,at:task.updatedAt});await save();form.reset();dialog.close();render();showToast('업무를 저장했습니다.');});
 load().catch(e=>{view.innerHTML=`<div class="empty-note">${escapeHtml(e.message)}<br>server.py로 실행했는지 확인하세요.</div>`;});
