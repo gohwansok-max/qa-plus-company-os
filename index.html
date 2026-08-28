@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>QA+ Company OS</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="shell">
+    <aside class="sidebar">
+      <div class="brand"><span class="brand-mark">Q+</span><div><strong>QA+ Company OS</strong><small><i></i> 로컬 안전 모드</small></div></div>
+      <nav id="nav">
+        <button class="nav-item active" data-view="dashboard"><span>▦</span>전사 대시보드</button>
+        <div class="nav-label">콘텐츠 운영</div>
+        <button class="nav-item" data-view="workroom"><span>◫</span>콘텐츠 워크룸</button>
+        <button class="nav-item" data-view="pipeline"><span>▷</span>OSMU 파이프라인</button>
+        <button class="nav-item" data-view="library"><span>▤</span>지식 라이브러리</button>
+        <div class="nav-label">AI 조직</div>
+        <button class="nav-item" data-view="agents"><span>◇</span>AI 임원진</button>
+        <button class="nav-item" data-view="automation"><span>⌁</span>자동화 센터</button>
+        <div class="nav-label">품질 관리</div>
+        <button class="nav-item" data-view="approval"><span>✓</span>대표 승인함 <b id="approvalBadge">0</b></button>
+        <button class="nav-item" data-view="settings"><span>⚙</span>설정·보안</button>
+      </nav>
+      <div class="sidebar-foot"><span class="avatar">김</span><div><strong>김이사 CSO</strong><small>전략 총괄 · 준비됨</small></div></div>
+    </aside>
+
+    <main>
+      <header><div><p id="breadcrumb">QA+ / 전사 대시보드</p><h1 id="pageTitle">전사 통합 대시보드</h1></div><div class="header-actions"><span class="safe">외부 발행 차단</span><button id="refreshBtn" class="secondary">새로고침</button><button id="newTaskBtn" class="primary">새 업무</button></div></header>
+      <section id="view"></section>
+    </main>
+  </div>
+
+  <dialog id="taskDialog">
+    <form id="taskForm" method="dialog">
+      <div class="dialog-head"><div><small>업무 등록</small><h2>새 작업을 시작합니다</h2></div><button type="button" class="icon-btn" id="closeDialog">×</button></div>
+      <label>업무 제목<input name="title" required minlength="3" placeholder="예: 냉각공정 블로그 제작"></label>
+      <div class="form-grid"><label>담당 팀<select name="team"><option>콘텐츠팀</option><option>품질지식팀</option><option>커뮤니티팀</option><option>자동화팀</option></select></label><label>담당 AI<select name="owner"><option>CCO</option><option>CPO</option><option>CTO</option><option>CMO</option><option>CXO</option><option>CSO</option></select></label></div>
+      <div class="form-grid"><label>단계<select name="stage"><option>대기</option><option>조사</option><option>작성</option><option>검수</option><option>승인대기</option></select></label><label>우선순위<select name="priority"><option>보통</option><option>높음</option><option>낮음</option></select></label></div>
+      <div class="dialog-actions"><button type="button" class="secondary" id="cancelDialog">취소</button><button class="primary" type="submit">저장</button></div>
+    </form>
+  </dialog>
+  <div id="toast" role="status"></div>
+  <script src="app.js"></script>
+</body>
+</html>

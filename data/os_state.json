@@ -1,0 +1,29 @@
+{
+  "tasks": [
+    {
+      "id": "seed-1",
+      "title": "화요일 QA+ 정기 영상 준비",
+      "team": "콘텐츠팀",
+      "stage": "검수",
+      "owner": "CCO",
+      "priority": "높음",
+      "updatedAt": "2026-08-28T08:00:00+09:00"
+    },
+    {
+      "id": "seed-2",
+      "title": "일일 인포그래픽 주제 선정",
+      "team": "콘텐츠팀",
+      "stage": "대기",
+      "owner": "COO",
+      "priority": "보통",
+      "updatedAt": "2026-08-28T08:00:00+09:00"
+    }
+  ],
+  "approvals": [],
+  "activity": [
+    {
+      "message": "QA+ Company OS가 초기화되었습니다.",
+      "at": "2026-08-28T08:00:00+09:00"
+    }
+  ]
+}
